@@ -10,7 +10,12 @@ def call(String imageTag, String hostPort) {
                 steps {
                     echo "************************ BUILD ************************"
 
-                    sh 'mvn clean package -DskipTests -Dcyclonedx.skip=true'
+                    sh 'rm -rf spring-petclinic || true'
+                    sh 'git clone https://github.com/pavandath/spring-petclinic.git'
+
+                    dir('spring-petclinic') {
+                        sh 'mvn clean package -DskipTests -Dcyclonedx.skip=true'
+                    }
                 }
             }
 
@@ -18,13 +23,15 @@ def call(String imageTag, String hostPort) {
                 steps {
                     echo "************************ CODE QUALITY ************************"
 
-                    withSonarQubeEnv('SonarQube') {
-                        sh '''
-                            mvn sonar:sonar \
-                                -Dsonar.projectKey=deploy \
-                                -DskipTests \
-                                -Dcyclonedx.skip=true
-                        '''
+                    dir('spring-petclinic') {
+                        withSonarQubeEnv('SonarQube') {
+                            sh '''
+                                mvn sonar:sonar \
+                                    -Dsonar.projectKey=deploy \
+                                    -DskipTests \
+                                    -Dcyclonedx.skip=true
+                            '''
+                        }
                     }
                 }
             }
@@ -33,19 +40,22 @@ def call(String imageTag, String hostPort) {
                 steps {
                     echo "************************ DOCKER BUILD ************************"
 
-                    writeFile file: 'Dockerfile', text: '''
-                        FROM eclipse-temurin:21-jdk-jammy
+                    dir('spring-petclinic') {
 
-                        WORKDIR /app
+                        writeFile file: 'Dockerfile', text: '''
+                            FROM eclipse-temurin:21-jdk-jammy
 
-                        COPY target/*.jar spring.jar
+                            WORKDIR /app
 
-                        EXPOSE 8080
+                            COPY target/*.jar spring.jar
 
-                        CMD ["java", "-jar", "spring.jar"]
-                    '''
+                            EXPOSE 8080
 
-                    sh "docker build -t java-spring:${imageTag} ."
+                            CMD ["java", "-jar", "spring.jar"]
+                        '''
+
+                        sh "docker build -t java-spring:${imageTag} ."
+                    }
                 }
             }
 
