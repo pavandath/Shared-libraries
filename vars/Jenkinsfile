@@ -1,3 +1,0 @@
-@Library('shared-library@main') _
-
-buildPipeline()
