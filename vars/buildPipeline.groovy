@@ -24,14 +24,16 @@ def call(String imageTag, String hostPort) {
                     echo "************************ CODE QUALITY ************************"
 
                     dir('spring-petclinic') {
-                        withSonarQubeEnv('SonarQube') {
-                            sh '''
-                                mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-                                    -Dsonar.projectKey=deploy \
-                                    -DskipTests \
-                                    -Dcyclonedx.skip=true
-                            '''
-                        }
+                     withSonarQubeEnv('SonarQube') {
+                        sh '''
+                            mvn clean verify \
+                                org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                                -Dsonar.projectKey=spring-petclinic \
+                                -Dsonar.projectName=spring-petclinic \
+                                -DskipTests \
+                                -Dcyclonedx.skip=true
+                        '''
+                    }
                     }
                 }
             }
