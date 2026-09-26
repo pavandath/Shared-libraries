@@ -26,7 +26,7 @@ def call(String imageTag, String hostPort) {
                     dir('spring-petclinic') {
                         withSonarQubeEnv('SonarQube') {
                             sh '''
-                                mvn sonar:sonar \
+                                mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                                     -Dsonar.projectKey=deploy \
                                     -DskipTests \
                                     -Dcyclonedx.skip=true
