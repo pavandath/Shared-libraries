@@ -1,3 +1,3 @@
-@Library('shared-library@test') _
+@Library('shared-library') _
 
-buildPipeline()
+buildPipeline('v2', '8082')
